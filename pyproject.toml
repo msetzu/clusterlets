@@ -1,0 +1,35 @@
+[build-system]
+requires = [
+    "hatchling"
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "clusterlets"
+version = "0.0.1"
+authors = [
+  { name="Mattia Setzu", email="setzu.mattia@gmail.com" },
+]
+description = "A library for clusterlet induction, that is, sets of fair clusters."
+readme = "README.md"
+requires-python = ">3.10, <=3.13"
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers"
+]
+
+dependencies = [
+    "joblib>=1.0.0",
+    "more-itertools>=10.0.0",
+    "numpy>=2.0.0",
+    "scikit-learn>=1.0.0",
+    "scipy>=1.0.0",
+    "threadpoolctl==3.0.0"
+]
+
+[project.urls]
+	"Homepage" = "https://github.com/msetzu/clusterlets"
+	"Bug Tracker" = "https://github.com/msetzu/clusterlets"
