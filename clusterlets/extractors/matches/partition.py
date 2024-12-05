@@ -5,7 +5,6 @@ from typing import List, Dict
 import numpy
 from scipy.spatial.distance import squareform, pdist
 from sklearn.metrics import silhouette_score
-from tqdm import tqdm
 
 from clusterlets.extractors import Clusterlet
 from clusterlets.extractors.matches import Matcher, SoftPartition, Match
@@ -153,7 +152,7 @@ class CentroidMatcher(Matcher):
                                                    base_clusterlets=sorted_clusterlets,
                                                    labels=self.labels,
                                                    target_ratio=target_ratio)
-                              for p in tqdm(candidate_matches)])
+                              for p in candidate_matches])
         best_match_idx = numpy.argmax(scores).item()
         best_match = candidate_matches[best_match_idx]
         best_match = SoftPartition(Match(set(block)) for block in best_match)

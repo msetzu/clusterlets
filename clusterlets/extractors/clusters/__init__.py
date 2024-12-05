@@ -2,7 +2,6 @@
 Extract clusterlets by clustering on each label, then matching label-specific clusterlets.
 """
 import copy
-import random
 from abc import abstractmethod
 from typing import Optional, Dict
 
