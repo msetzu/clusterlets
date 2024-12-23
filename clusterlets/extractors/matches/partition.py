@@ -90,6 +90,7 @@ class CentroidMatcher(Matcher):
         return {
             "matcher": self.__class__.__name__,
             "sample_size":  self.sample_size,
+            "distance_weight": self.distance_weight,
             "random_state": self.seed
         }
 
