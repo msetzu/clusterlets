@@ -31,15 +31,17 @@ def is_acceptable_partition(partition: List[List[Clusterlet]]) -> bool:
 class CentroidMatcher(Matcher):
     """Matches clusters of different labels together to compose clusterlets. Weighs in centroid distance and
     label distribution."""
-    def __init__(self, data: numpy.ndarray, labels: numpy.ndarray, sample_size: int = 250000, random_state: int = 42):
+    def __init__(self, data: numpy.ndarray, labels: numpy.ndarray, sample_size: int = 250000,
+                 distance_weight: float = 0.5, random_state: int = 42):
         self.data = data
         self.labels = labels
         self._distances = squareform(pdist(data))
         self.sample_size = sample_size
+        self.distance_weight = distance_weight
         self.seed = random_state
 
     def __str__(self):
-        return f"CentroidMatcher with {self.sample_size} sample size"
+        return f"CentroidMatcher with {self.sample_size} sample size and {self.distance_weight} distance weight."
 
     def score_partition(self, partition: List[List[Clusterlet]],
                         clusterlet_distances: numpy.ndarray,
@@ -82,7 +84,7 @@ class CentroidMatcher(Matcher):
             metric="precomputed"
         )
 
-        return 0 * distance_score + ratio_score
+        return self.distance_weight * distance_score + (1 - self.distance_weight) * ratio_score
 
     def get_params(self) -> Dict:
         return {
