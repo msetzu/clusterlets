@@ -12,9 +12,9 @@ label distribution.
 # Quickstart
 
 ### Installation
+Developed on Python 3.11.
 ```shell
-mkvirtualenv -p python3.12 clusfairing
-pip install -r requirements.txt
+pip install clusterlets
 ```
 
 ### Getting started
