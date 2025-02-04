@@ -1,6 +1,6 @@
-# Clusfairing
+# Clusterlets
 
-Clusfairing is a Python library collecting algorithms for fair clustering, mainly aimed at *clusterlet*-based
+`clusterlets` is a Python library collecting algorithms for fair clustering, mainly aimed at *clusterlet*-based
 approaches. A *clusterlet* defines (like [fair coresets](http://arxiv.org/abs/1812.10854) and [fairlets](https://proceedings.neurips.cc/paper/2017/hash/978fce5bcc4eccc88ad48ce3914124a2-Abstract.html))
 a clustering of data which respects some notion of fairness or balance.
 Under some assumptions, (centroids of)
