@@ -74,7 +74,7 @@ class KMeansExtractor(ClusteringExtractor):
     def __init__(self, matcher: Optional[Matcher] = None, clustering_hyperparameters: Dict = None):
         super().__init__(matcher=matcher)
         self.clustering_hyperparameters = clustering_hyperparameters if clustering_hyperparameters is not None else dict()
-        self.clustering_algorithm = KMeans(n_clusters=self.clustering_hyperparameters.get("k", 10),
+        self.clustering_algorithm = KMeans(n_clusters=self.clustering_hyperparameters.get("n_clusters", 10),
                                            init="k-means++")
 
     def __str__(self):
@@ -84,6 +84,7 @@ class KMeansExtractor(ClusteringExtractor):
         d = {
             "extractor": self.__class__.__name__,
             "clustering_algorithm": self.clustering_algorithm.__class__.__name__,
+            "extractor_n_clusters": self.clustering_algorithm.n_clusters
         }
         d.update(self.clustering_hyperparameters)
 
