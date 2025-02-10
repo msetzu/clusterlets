@@ -57,6 +57,8 @@ class ClusteringExtractor(ClusterletExtractor):
                 clusterlet.label_frequencies = frequencies
 
         base_clusterlets = set(more_itertools.flatten(clusterlets))
+        base_clusterlets = set(filter(lambda x: x.index.size > 0, base_clusterlets))
+        # some clustering algorithm yield empyty clusters: purge them!
         # match each label-specific cluster to other clusters
         clusterlets = self.matcher.match(base_clusterlets, target_ratio=target_ratio)
         clusterlets = set(Clusterlet.merge(c) for c in clusterlets)
