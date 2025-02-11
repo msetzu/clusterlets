@@ -8,6 +8,7 @@ from sklearn.metrics import silhouette_score
 
 from clusterlets.extractors import Clusterlet
 from clusterlets.extractors.matches import Matcher, SoftPartition, Match
+from tqdm import tqdm
 
 
 def is_acceptable_partition(partition: List[List[Clusterlet]]) -> bool:
@@ -31,10 +32,12 @@ def is_acceptable_partition(partition: List[List[Clusterlet]]) -> bool:
 class CentroidMatcher(Matcher):
     """Matches clusters of different labels together to compose clusterlets. Weighs in centroid distance and
     label distribution."""
-    def __init__(self, data: numpy.ndarray, labels: numpy.ndarray, sample_size: int = 250000,
+    def __init__(self, data: numpy.ndarray, labels: numpy.ndarray, overlapping: bool,
+                 sample_size: int = 250000,
                  distance_weight: float = 0.5, random_state: int = 42):
         self.data = data
         self.labels = labels
+        self.overlapping_partitions = overlapping
         self._distances = squareform(pdist(data))
         self.sample_size = sample_size
         self.distance_weight = distance_weight
@@ -89,6 +92,7 @@ class CentroidMatcher(Matcher):
     def get_params(self) -> Dict:
         return {
             "matcher": self.__class__.__name__,
+            "overlapping": self.overlapping_partitions,
             "sample_size":  self.sample_size,
             "distance_weight": self.distance_weight,
             "random_state": self.seed
@@ -106,30 +110,34 @@ class CentroidMatcher(Matcher):
         """
         partitions = list()
         number_of_elements = len(clusterlets)
-        # balance weights to avoid blocks with only one clusterlet: the larger the block gravity, the smaller the
-        # expected block size
-        # todo: may want to parametrize in future extensions
-        block_gravity = number_of_elements // 5
+        for _ in range(k):
+            assignments = list()
+            available_clusterlets = list(range(number_of_elements))
 
-        # first block
-        balancing_weights = [(block_gravity - 1) / number_of_elements
-                             for _ in range(number_of_elements // (block_gravity - 1))]
-        leftover_probability_mass = 1 - sum(balancing_weights)
-        leftover_elements = number_of_elements - len(balancing_weights)
-        balancing_weights += [leftover_probability_mass / leftover_elements] * leftover_elements
-        assignments = [random.choices(range(number_of_elements), k=number_of_elements, weights=balancing_weights)
-                       for _ in range(k)]
-        for assignment in assignments:
-            blocks_names = set(assignment)
-            partitions.append([
-                [
-                    clusterlets[i]  # pick all clusterlets with given block
-                    for i, clusterlet in enumerate(clusterlets) if assignment[i] == block
-                ]
-                for block in blocks_names
-            ])
+            if self.overlapping_partitions:
+                missing_clusterlets = set(range(number_of_elements))
+                # add blocks as long as there is at least one block-less element
+                while len(missing_clusterlets) > 0:
+                    number_of_elements_in_block = random.choice(range(2, number_of_elements))
+                    assignments.append(random.sample(available_clusterlets,
+                                                      k=min(number_of_elements_in_block, len(available_clusterlets))))
+                    missing_clusterlets = {element for element in missing_clusterlets if element not in assignments[-1]}
+
+            else:
+                # add blocks as long as there is at least one available element
+                while len(available_clusterlets) > 0:
+                    number_of_elements_in_block = random.choice(range(2, number_of_elements))
+                    assignments.append(random.sample(available_clusterlets,
+                                                     k=min(number_of_elements_in_block, len(available_clusterlets))))
+                    # remove added clusterlets
+                    available_clusterlets = [element for element in available_clusterlets if element not in assignments[-1]]
+
+            partition = [[clusterlets[index] for index in block]
+                         for block in assignments]
+            partitions.append(partition)
 
         return partitions
+
 
     def match(self, clusterlets: set[Clusterlet], target_ratio: numpy.ndarray, **kwargs) -> SoftPartition:
         """Match the given clusterings, creating clusters with distribution similar to `target_ratio`.
@@ -155,7 +163,7 @@ class CentroidMatcher(Matcher):
                                                    base_clusterlets=sorted_clusterlets,
                                                    labels=self.labels,
                                                    target_ratio=target_ratio)
-                              for p in candidate_matches])
+                              for p in tqdm(candidate_matches)])
         best_match_idx = numpy.argmax(scores).item()
         best_match = candidate_matches[best_match_idx]
         best_match = SoftPartition(Match(set(block)) for block in best_match)
