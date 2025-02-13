@@ -65,7 +65,7 @@ class PinballMatcher(Matcher):
                                  for label in unique_labels]
         bipartite_distances = self.cost(per_label_clusterlets[0], per_label_clusterlets[1])
 
-        # matches are bidirectional to avoid having
+        # matches are bidirectional to avoid having missing clusterlets
         left_to_right_matches = bipartite_distances.argmin(axis=1)  # column 1: left, column 2: right
         right_to_left_matches = bipartite_distances.argmin(axis=0)  # column 1: right, column 2: left
         left_to_right_matches = numpy.vstack((numpy.arange(left_to_right_matches.size),
@@ -93,17 +93,17 @@ class PinballMatcher(Matcher):
             partition = list()
             for left_match, right_match in matches:
                 hitlist = [left_match, right_match]  # hits of the pinball, only indicated with their _id
-
-                is_forward_direction = False
+                # every pinball goes left-right-left-right-etc.
+                is_left_to_right_direction = False
                 for hop in range(self.hops - 1):
                     player = hitlist[-1]
-                    if not is_forward_direction: # left matches of a right hit: pinballing from right to left
+                    if not is_left_to_right_direction: # left matches of a right hit: pinballing from right to left
                         hitlist.append(right_to_left_matches[player, 1])
                     else: # right matches of a left hit: pinballing from left to right
                         hitlist.append(left_to_right_matches[player, 1])
 
                     # update direction
-                    is_forward_direction = not is_forward_direction
+                    is_left_to_right_direction = not is_left_to_right_direction
 
                 # update hitlist
                 block = Match({per_label_clusterlets[i % 2][hit]  # i % 2 to get the correct list

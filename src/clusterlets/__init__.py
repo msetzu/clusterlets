@@ -65,7 +65,7 @@ class Clusterlet:
 
     @staticmethod
     def merge(clusterlets: Iterable[Clusterlet], remove_overlap: bool = True) -> Clusterlet:
-        """
+        """Merge clusterlets together, creating a new clusterlet.
 
         Args:
             clusterlets: The clusterlets to merge.
@@ -83,9 +83,9 @@ class Clusterlet:
     def __add__(self, other: Clusterlet) -> Clusterlet:
         """Sum two clusterlets"""
         if self.label_frequencies is not None and other.label_frequencies is not None:
-            label = self.label_frequencies + other.label_frequencies
+            label_frequencies = self.label_frequencies + other.label_frequencies
         else:
-            label = None
+            label_frequencies = None
         
         if self.centroid is not None and other.centroid is not None:
             centroid = (self.centroid + other.centroid) / 2
@@ -99,7 +99,7 @@ class Clusterlet:
 
         return Clusterlet(
             id_=None,
-            label_frequencies=label,
+            label_frequencies=label_frequencies,
             centroid=centroid,
             index=index
         )
