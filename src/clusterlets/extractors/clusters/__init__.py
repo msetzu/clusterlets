@@ -92,6 +92,8 @@ class KMeansExtractor(ClusteringExtractor):
 
     def cluster(self, data: numpy.ndarray, indexes: numpy.ndarray, label_set: numpy.ndarray, label: int) -> set[Clusterlet]:
         algorithm = copy.deepcopy(self.clustering_algorithm)
+        # fix number of clusters lower than instances
+        algorithm.n_clusters = min(algorithm.n_clusters, data.shape[0])
         algorithm.fit(data)
 
         clusterlets = Clusterlet.from_centroid_clustering(algorithm, label_set=label_set, label=label)
